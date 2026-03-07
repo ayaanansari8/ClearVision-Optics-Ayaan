@@ -11,7 +11,7 @@ app.use(cors())
 app.use(express.json());
 var colors = require('colors');
 const morgan = require("morgan")
-const { authrouter } = require('./routes/authRouter');
+const authrouter = require('./routes/authRouter');
 const { AdminModel } = require('./model/Admin.model');
 const { Adminouter } = require('./routes/AdminRouter');
 const { MustBeSigned } = require('./middleware/authenticate');
@@ -45,7 +45,9 @@ app.get("/", (req, res) => {
 })
 
 
-app.listen(process.env._PORT, async () => {
+const PORT = process.env._PORT || 8080;
+
+app.listen(PORT, async () => {
     try {
         await connection
         console.log(colors.info("Connected to DB!!"));
@@ -53,5 +55,5 @@ app.listen(process.env._PORT, async () => {
         console.log(colors.warn(error));
         console.log(colors.error("Not connected to DB!!"));
     }
-    console.log("server is running 8080");
+    console.log(`server is running ${PORT}`);
 });

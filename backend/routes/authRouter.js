@@ -32,6 +32,4 @@ authrouter.get("/user-auth", MustBeSigned, (req, res) => {
 // });
 
 // export default authrouter
-module.exports = {
-    authrouter
-}
+module.exports = authrouter
