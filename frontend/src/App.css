@@ -36,3 +36,7 @@
     transform: rotate(360deg);
   }
 }
+.admin-layout {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}

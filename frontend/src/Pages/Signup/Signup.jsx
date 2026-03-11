@@ -22,7 +22,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 
-const BASE_URL = process.env.REACT_APP_BASEURL || "http://localhost:5000";
+const BASE_URL = process.env.REACT_APP_BASEURL || "http://localhost:8080";
 
 const Signup = () => {
   const initial = {

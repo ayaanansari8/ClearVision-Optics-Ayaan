@@ -26,52 +26,39 @@ import { useNavigate } from 'react-router-dom';
     const [phone,setPhone]=useState("");
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
+    const [loading, setLoading]=useState(false);
     const toast=useToast();
     const navigate=useNavigate()
 
     const handleSubmit=()=>{
-        const payload={name,phone,email,password}
-        // console.log(payload);
-        setName("");
-        setPhone("");
-        setEmail("");
-        setPassword("");
-        axios.post(`${process.env.REACT_APP_BASEURL}/admin/register`,payload)
+        if(!name || !phone || !email || !password){
+          toast({ title:"Please fill in all fields", status:"warning", duration:3000, isClosable:true, position:"top" });
+          return;
+        }
+        const payload={name,phone,email,password};
+        setLoading(true);
+        axios.post(`${process.env.REACT_APP_BASEURL || "http://localhost:8080"}/admin/register`,payload)
         .then((res)=>{
             console.log(res);
             if(res.data.error){
-              toast({
-                title:res.data.error,
-                status:"error",
-                duration:4000,
-                isClosable:true,
-                position:"top"
-            })
+              toast({ title:res.data.error, status:"error", duration:4000, isClosable:true, position:"top" });
             }
-            if(res.data.message=="Already Register please login"){
-              toast({
-                title:"Already Register please login",
-                status:"info",
-                duration:4000,
-                isClosable:true,
-                position:"top"
-            })
+            else if(res.data.message==="Already Register please login"){
+              toast({ title:"Already registered, please login", status:"info", duration:4000, isClosable:true, position:"top" });
             }
-            if(res.data.message=="Admin Registered Successfully"){
-              toast({
-                title:"Admin Registered Successfully!!",
-                description:"Please Login now!",
-                status:"success",
-                duration:4000,
-                isClosable:true,
-                position:"top"
-            })
-            navigate("/adminlogin")
+            else if(res.data.message==="Admin Registered Successfully"){
+              setName(""); setPhone(""); setEmail(""); setPassword("");
+              toast({ title:"Admin Registered Successfully!!", description:"Please Login now!", status:"success", duration:4000, isClosable:true, position:"top" });
+              navigate("/adminlogin");
             }
         })
         .catch((err)=>{
             console.log(err);
+            toast({ title:"Something went wrong. Please try again.", status:"error", duration:4000, isClosable:true, position:"top" });
         })
+        .finally(()=>{
+          setLoading(false);
+        });
     }
   
     return (
@@ -117,9 +104,7 @@ import { useNavigate } from 'react-router-dom';
                   <InputRightElement h={'full'}>
                     <Button
                       variant={'ghost'}
-                      onClick={() =>
-                        setShowPassword((showPassword) => !showPassword)
-                      }>
+                      onClick={() => setShowPassword((showPassword) => !showPassword)}>
                       {showPassword ? <ViewIcon /> : <ViewOffIcon />}
                     </Button>
                   </InputRightElement>
@@ -128,13 +113,12 @@ import { useNavigate } from 'react-router-dom';
               <Stack spacing={10} pt={2}>
                 <Button
                   onClick={handleSubmit}
-                  loadingText="Submitting"
+                  isLoading={loading}
+                  loadingText="Submitting..."
                   size="lg"
                   bg={'#11DAAC'}
                   color={'white'}
-                  _hover={{
-                    bg: '#11DAAC',
-                  }}>
+                  _hover={{ bg: '#0ec99b' }}>
                   Sign up
                 </Button>
               </Stack>

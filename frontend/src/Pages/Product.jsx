@@ -1,7 +1,3 @@
-// frontend/src/pages/ProductDetail/ProductDetail.jsx
-// (or SingleProduct.jsx — wherever your product detail page lives)
-// Complete drop-in replacement — UI only, all existing Redux actions preserved
-
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -32,10 +28,7 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-// Keep your existing imports:
-// import { getProductById } from "../../redux/actions/productActions";
-// import { addToCart } from "../../redux/actions/cartActions";
-// import { addToWishlist } from "../../redux/actions/wishlistActions";
+import { addToCart } from "../redux/cartReducer/action";
 
 const HeartIcon = ({ filled = false, size = 20 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
@@ -57,7 +50,6 @@ const ZoomIcon = ({ size = 18 }) => (
   </svg>
 );
 
-// ─── Image Gallery ────────────────────────────────────────────────────────────
 const ImageGallery = ({ images = [], name = "" }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
@@ -77,7 +69,6 @@ const ImageGallery = ({ images = [], name = "" }) => {
 
   return (
     <Box position="sticky" top="24">
-      {/* Main image */}
       <Box
         position="relative"
         overflow="hidden"
@@ -101,8 +92,6 @@ const ImageGallery = ({ images = [], name = "" }) => {
             />
           </Box>
         </AspectRatio>
-
-        {/* Controls */}
         <HStack position="absolute" top="4" right="4" spacing="2">
           <IconButton
             icon={<ZoomIcon />}
@@ -116,8 +105,6 @@ const ImageGallery = ({ images = [], name = "" }) => {
             onClick={(e) => { e.stopPropagation(); setIsZoomed(!isZoomed); }}
           />
         </HStack>
-
-        {/* Image counter */}
         <Box position="absolute" bottom="4" right="4" bg="white" px="3" py="1">
           <Text fontSize="2xs" color="ink.muted" letterSpacing="0.1em">
             {activeIdx + 1} / {displayImages.length}
@@ -125,14 +112,12 @@ const ImageGallery = ({ images = [], name = "" }) => {
         </Box>
       </Box>
 
-      {/* Thumbnails */}
       {displayImages.length > 1 && (
         <HStack spacing="2" mt="3">
           {displayImages.map((img, i) => (
             <Box
               key={i}
-              w="16"
-              h="16"
+              w="16" h="16"
               overflow="hidden"
               cursor="pointer"
               border="1.5px solid"
@@ -145,8 +130,7 @@ const ImageGallery = ({ images = [], name = "" }) => {
                 src={img}
                 alt={`View ${i + 1}`}
                 objectFit="cover"
-                w="full"
-                h="full"
+                w="full" h="full"
                 opacity={activeIdx === i ? 1 : 0.6}
                 transition="opacity 0.2s"
                 _hover={{ opacity: 1 }}
@@ -159,7 +143,6 @@ const ImageGallery = ({ images = [], name = "" }) => {
   );
 };
 
-// ─── Product Info ─────────────────────────────────────────────────────────────
 const frameColors = [
   { name: "Matte Black", hex: "#1a1a1a" },
   { name: "Tortoise", hex: "#7B4F2E" },
@@ -181,10 +164,9 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
   const toast = useToast();
 
   const name = product?.name || product?.productName || "Premium Eyewear Frame";
-  const price = product?.price || product?.productPrice || 0;
+  const price = product?.price || product?.discountPrice || product?.mrp || product?.sellingPrice || product?.productPrice || 0;
   const originalPrice = product?.originalPrice || product?.mrp;
-  const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : null;
-  const description = product?.description || product?.productDescription || "";
+  const discount = originalPrice && originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : null;
   const brand = product?.brand || product?.brandName || "ClearDekho";
   const sku = product?.sku || product?._id?.slice(-8).toUpperCase() || "CD00001";
   const inStock = product?.stock !== 0 && product?.inStock !== false;
@@ -211,15 +193,8 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
 
   return (
     <VStack align="flex-start" spacing="0">
-      {/* Brand + badges */}
       <HStack spacing="3" mb="3">
-        <Text
-          fontSize="2xs"
-          color="ink.muted"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
-          fontWeight="500"
-        >
+        <Text fontSize="2xs" color="ink.muted" letterSpacing="0.2em" textTransform="uppercase" fontWeight="500">
           {brand}
         </Text>
         {discount && (
@@ -228,17 +203,12 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
           </Badge>
         )}
         {inStock ? (
-          <Badge bg="green.50" color="green.600" fontSize="2xs" borderColor="green.200" variant="outline">
-            In Stock
-          </Badge>
+          <Badge bg="green.50" color="green.600" fontSize="2xs" borderColor="green.200" variant="outline">In Stock</Badge>
         ) : (
-          <Badge bg="red.50" color="red.500" fontSize="2xs" borderColor="red.200" variant="outline">
-            Out of Stock
-          </Badge>
+          <Badge bg="red.50" color="red.500" fontSize="2xs" borderColor="red.200" variant="outline">Out of Stock</Badge>
         )}
       </HStack>
 
-      {/* Name */}
       <Heading
         fontSize={{ base: "2xl", md: "3xl" }}
         fontWeight="400"
@@ -251,47 +221,32 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
         {name}
       </Heading>
 
-      {/* Price */}
       <HStack align="baseline" spacing="3" mb="6">
-        <Text
-          fontSize="3xl"
-          fontFamily="'Cormorant Garamond', serif"
-          fontWeight="500"
-          color="ink.primary"
-          lineHeight="1"
-        >
+        <Text fontSize="3xl" fontFamily="'Cormorant Garamond', serif" fontWeight="500" color="ink.primary" lineHeight="1">
           ₹{totalPrice.toLocaleString()}
         </Text>
-        {originalPrice && (
+        {originalPrice && originalPrice > price && (
           <Text fontSize="md" color="ink.muted" textDecoration="line-through" fontWeight="300">
             ₹{originalPrice.toLocaleString()}
           </Text>
         )}
         {lensAddon > 0 && (
-          <Text fontSize="xs" color="ink.muted">
-            (incl. lens upgrade)
-          </Text>
+          <Text fontSize="xs" color="ink.muted">(incl. lens upgrade)</Text>
         )}
       </HStack>
 
       <Divider borderColor="surface.border" mb="6" />
 
-      {/* Color selection */}
       <VStack align="flex-start" spacing="3" mb="6" w="full">
         <HStack spacing="2">
-          <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.12em" color="ink.muted">
-            Frame Colour:
-          </Text>
-          <Text fontSize="xs" color="ink.primary" fontWeight="500">
-            {frameColors[selectedColor].name}
-          </Text>
+          <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.12em" color="ink.muted">Frame Colour:</Text>
+          <Text fontSize="xs" color="ink.primary" fontWeight="500">{frameColors[selectedColor].name}</Text>
         </HStack>
         <HStack spacing="3">
           {frameColors.map((color, i) => (
             <Box
               key={color.name}
-              w="8"
-              h="8"
+              w="8" h="8"
               bg={color.hex}
               cursor="pointer"
               border="2px solid"
@@ -307,11 +262,8 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
         </HStack>
       </VStack>
 
-      {/* Lens type */}
       <VStack align="flex-start" spacing="3" mb="8" w="full">
-        <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.12em" color="ink.muted">
-          Lens Type:
-        </Text>
+        <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.12em" color="ink.muted">Lens Type:</Text>
         <SimpleGrid columns={2} spacing="2" w="full">
           {lensTypes.map((lens) => (
             <Box
@@ -325,18 +277,10 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
               onClick={() => setSelectedLens(lens.id)}
               _hover={{ borderColor: "ink.primary" }}
             >
-              <Text
-                fontSize="xs"
-                fontWeight="400"
-                color={selectedLens === lens.id ? "white" : "ink.primary"}
-                letterSpacing="0.05em"
-              >
+              <Text fontSize="xs" fontWeight="400" color={selectedLens === lens.id ? "white" : "ink.primary"} letterSpacing="0.05em">
                 {lens.label}
               </Text>
-              <Text
-                fontSize="2xs"
-                color={selectedLens === lens.id ? "whiteAlpha.700" : "ink.muted"}
-              >
+              <Text fontSize="2xs" color={selectedLens === lens.id ? "whiteAlpha.700" : "ink.muted"}>
                 {lens.price === 0 ? "Included" : `+₹${lens.price}`}
               </Text>
             </Box>
@@ -344,7 +288,6 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
         </SimpleGrid>
       </VStack>
 
-      {/* CTA buttons */}
       <VStack spacing="3" w="full" mb="6">
         <Button
           variant="solid"
@@ -376,14 +319,11 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
             size="md"
             aria-label="Share"
             color="ink.secondary"
-            onClick={() => {
-              navigator.share?.({ title: name, url: window.location.href });
-            }}
+            onClick={() => { navigator.share?.({ title: name, url: window.location.href }); }}
           />
         </HStack>
       </VStack>
 
-      {/* Offers */}
       <Box w="full" bg="surface.warm" p="5" border="1px solid" borderColor="surface.border" mb="6">
         <Text fontSize="xs" fontWeight="500" color="ink.primary" letterSpacing="0.08em" textTransform="uppercase" mb="3">
           Available Offers
@@ -396,23 +336,17 @@ const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
           ].map((offer) => (
             <HStack key={offer} spacing="3" align="flex-start">
               <Text color="accent.gold" fontSize="xs" mt="0.5">✦</Text>
-              <Text fontSize="xs" color="ink.secondary" lineHeight="1.6">
-                {offer}
-              </Text>
+              <Text fontSize="xs" color="ink.secondary" lineHeight="1.6">{offer}</Text>
             </HStack>
           ))}
         </VStack>
       </Box>
 
-      {/* SKU */}
-      <Text fontSize="2xs" color="ink.muted" letterSpacing="0.1em">
-        SKU: {sku}
-      </Text>
+      <Text fontSize="2xs" color="ink.muted" letterSpacing="0.1em">SKU: {sku}</Text>
     </VStack>
   );
 };
 
-// ─── Product Tabs ─────────────────────────────────────────────────────────────
 const ProductTabs = ({ product }) => {
   const description = product?.description || product?.productDescription || "Premium quality eyewear frame crafted with attention to detail. Lightweight design for all-day comfort.";
 
@@ -441,52 +375,38 @@ const ProductTabs = ({ product }) => {
               color="ink.muted"
               pb="4"
               mr="8"
-              _selected={{
-                color: "ink.primary",
-                borderBottom: "1.5px solid",
-                borderColor: "ink.primary",
-                mb: "-1px",
-              }}
+              _selected={{ color: "ink.primary", borderBottom: "1.5px solid", borderColor: "ink.primary", mb: "-1px" }}
               _hover={{ color: "ink.secondary" }}
             >
               {tab}
             </Tab>
           ))}
         </TabList>
-
         <TabPanels>
           <TabPanel px="0" py="8">
             <Text fontSize="sm" color="ink.secondary" lineHeight="1.9" maxW="680px" fontWeight="300">
               {description}
             </Text>
           </TabPanel>
-
           <TabPanel px="0" py="8">
             <SimpleGrid columns={{ base: 1, sm: 2 }} spacing="0" maxW="580px">
               {specs.map((spec, i) => (
                 <Flex
                   key={spec.label}
-                  py="3"
-                  px="4"
+                  py="3" px="4"
                   bg={i % 2 === 0 ? "surface.warm" : "white"}
                   justify="space-between"
                   align="center"
                   border="1px solid"
                   borderColor="surface.border"
-                  mt="-1px"
-                  ml="-1px"
+                  mt="-1px" ml="-1px"
                 >
-                  <Text fontSize="xs" color="ink.muted" letterSpacing="0.05em">
-                    {spec.label}
-                  </Text>
-                  <Text fontSize="xs" color="ink.primary" fontWeight="500">
-                    {spec.value}
-                  </Text>
+                  <Text fontSize="xs" color="ink.muted" letterSpacing="0.05em">{spec.label}</Text>
+                  <Text fontSize="xs" color="ink.primary" fontWeight="500">{spec.value}</Text>
                 </Flex>
               ))}
             </SimpleGrid>
           </TabPanel>
-
           <TabPanel px="0" py="8">
             <VStack align="flex-start" spacing="6" maxW="580px">
               {[
@@ -496,12 +416,8 @@ const ProductTabs = ({ product }) => {
                 { title: "Warranty", desc: "1-year manufacturer warranty on all frames. Covers manufacturing defects." },
               ].map((item) => (
                 <Box key={item.title}>
-                  <Text fontSize="sm" fontWeight="500" color="ink.primary" mb="1.5" letterSpacing="0.03em">
-                    {item.title}
-                  </Text>
-                  <Text fontSize="sm" color="ink.secondary" lineHeight="1.8" fontWeight="300">
-                    {item.desc}
-                  </Text>
+                  <Text fontSize="sm" fontWeight="500" color="ink.primary" mb="1.5" letterSpacing="0.03em">{item.title}</Text>
+                  <Text fontSize="sm" color="ink.secondary" lineHeight="1.8" fontWeight="300">{item.desc}</Text>
                 </Box>
               ))}
             </VStack>
@@ -512,7 +428,6 @@ const ProductTabs = ({ product }) => {
   );
 };
 
-// ─── Related Products Strip ───────────────────────────────────────────────────
 const RelatedProducts = ({ products = [] }) => {
   if (!products.length) return null;
   return (
@@ -522,13 +437,13 @@ const RelatedProducts = ({ products = [] }) => {
           <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="300" letterSpacing="-0.02em">
             You May Also Like
           </Heading>
-          <Button variant="ghost" size="sm" as={RouterLink} to="/products" fontSize="xs" letterSpacing="0.1em" textTransform="uppercase" rightIcon={<Text>→</Text>}>
+          <Button variant="ghost" size="sm" as={RouterLink} to="/eyeglasses" fontSize="xs" letterSpacing="0.1em" textTransform="uppercase" rightIcon={<Text>→</Text>}>
             View All
           </Button>
         </Flex>
         <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: "4", md: "6" }}>
           {products.slice(0, 4).map((p) => (
-            <RouterLink key={p._id || p.id} to={`/product/${p._id || p.id}`}>
+            <RouterLink key={p._id || p.id} to={`/eyeglasses/${p._id || p.id}`}>
               <Box role="group" cursor="pointer">
                 <Box overflow="hidden" bg="surface.card" mb="3">
                   <AspectRatio ratio={1}>
@@ -542,11 +457,9 @@ const RelatedProducts = ({ products = [] }) => {
                     />
                   </AspectRatio>
                 </Box>
-                <Text fontSize="sm" color="ink.primary" noOfLines={1} mb="1">
-                  {p.name || p.productName}
-                </Text>
+                <Text fontSize="sm" color="ink.primary" noOfLines={1} mb="1">{p.name || p.productName}</Text>
                 <Text fontSize="sm" fontWeight="500" color="ink.primary">
-                  ₹{(p.price || p.productPrice || 0).toLocaleString()}
+                  ₹{(p.price || p.discountPrice || p.mrp || p.productPrice || 0).toLocaleString()}
                 </Text>
               </Box>
             </RouterLink>
@@ -557,38 +470,23 @@ const RelatedProducts = ({ products = [] }) => {
   );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const toast = useToast();
 
-  // Adjust selectors to your Redux store shape
-  const product = useSelector(
-    (state) =>
-      state.product?.product ||
-      state.productReducer?.product ||
-      state.singleProduct?.product ||
-      null
-  );
   const allProducts = useSelector(
-    (state) =>
-      state.products?.products ||
-      state.productReducer?.products ||
-      []
+    (state) => state.products?.products || state.productReducer?.products || []
   );
+
+  const product = allProducts.find(p => (p._id || p.id) === id) || null;
+
   const loading = useSelector(
-    (state) =>
-      state.product?.loading ||
-      state.productReducer?.loading ||
-      false
+    (state) => state.product?.loading || state.productReducer?.loading || false
   );
 
   useEffect(() => {
-    // Keep your existing dispatch:
-    // dispatch(getProductById(id));
     window.scrollTo(0, 0);
-  }, [id, dispatch]);
+  }, [id]);
 
   const images = product?.images || (product?.image ? [product.image] : []);
   const relatedProducts = allProducts.filter(
@@ -596,13 +494,18 @@ const ProductDetail = () => {
   );
 
   const handleAddToCart = (item) => {
-    // Keep your existing dispatch:
-    // dispatch(addToCart(item));
+    const productToAdd = item || product;
+    if (!productToAdd) return;
+    dispatch(addToCart({
+      ...productToAdd,
+      price: productToAdd.price || productToAdd.discountPrice || productToAdd.mrp || productToAdd.sellingPrice || productToAdd.productPrice || 0,
+      image: productToAdd.image || productToAdd.images?.[0] || productToAdd.productImage || "",
+      name: productToAdd.name || productToAdd.productName || "Eyewear Frame",
+    }));
   };
 
   const handleAddToWishlist = (item) => {
-    // Keep your existing dispatch:
-    // dispatch(addToWishlist(item));
+    console.log("Wishlist:", item);
   };
 
   if (loading) {
@@ -620,31 +523,27 @@ const ProductDetail = () => {
     );
   }
 
+  if (!product) {
+    return (
+      <Container maxW="1400px" px={{ base: "6", md: "12" }} py="20">
+        <VStack spacing="4">
+          <Text fontSize="xl" color="ink.primary">Product not found.</Text>
+          <Button as={RouterLink} to="/eyeglasses" variant="solid">Browse Eyeglasses</Button>
+        </VStack>
+      </Container>
+    );
+  }
+
   return (
     <Box bg="white">
-      {/* Breadcrumb */}
-      <Box
-        borderBottom="1px solid"
-        borderColor="surface.border"
-        bg="surface.warm"
-        py="3"
-      >
+      <Box borderBottom="1px solid" borderColor="surface.border" bg="surface.warm" py="3">
         <Container maxW="1400px" px={{ base: "6", md: "12" }}>
-          <Breadcrumb
-            spacing="2"
-            separator={<Text color="ink.muted" fontSize="xs">/</Text>}
-            fontSize="xs"
-            color="ink.muted"
-          >
+          <Breadcrumb spacing="2" separator={<Text color="ink.muted" fontSize="xs">/</Text>} fontSize="xs" color="ink.muted">
             <BreadcrumbItem>
-              <BreadcrumbLink as={RouterLink} to="/" _hover={{ color: "ink.primary" }}>
-                Home
-              </BreadcrumbLink>
+              <BreadcrumbLink as={RouterLink} to="/" _hover={{ color: "ink.primary" }}>Home</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem>
-              <BreadcrumbLink as={RouterLink} to="/products" _hover={{ color: "ink.primary" }}>
-                Eyeglasses
-              </BreadcrumbLink>
+              <BreadcrumbLink as={RouterLink} to="/eyeglasses" _hover={{ color: "ink.primary" }}>Eyeglasses</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbItem isCurrentPage>
               <Text color="ink.primary" noOfLines={1} maxW="200px">
@@ -655,27 +554,15 @@ const ProductDetail = () => {
         </Container>
       </Box>
 
-      {/* Main content */}
       <Container maxW="1400px" px={{ base: "6", md: "12" }} py={{ base: "10", md: "16" }}>
-        <Grid
-          templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
-          gap={{ base: "10", lg: "20" }}
-        >
+        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={{ base: "10", lg: "20" }}>
           <GridItem>
-            <ImageGallery
-              images={images}
-              name={product?.name || product?.productName}
-            />
+            <ImageGallery images={images} name={product?.name || product?.productName} />
           </GridItem>
           <GridItem>
-            <ProductInfo
-              product={product}
-              onAddToCart={handleAddToCart}
-              onAddToWishlist={handleAddToWishlist}
-            />
+            <ProductInfo product={product} onAddToCart={handleAddToCart} onAddToWishlist={handleAddToWishlist} />
           </GridItem>
         </Grid>
-
         <ProductTabs product={product} />
       </Container>
 

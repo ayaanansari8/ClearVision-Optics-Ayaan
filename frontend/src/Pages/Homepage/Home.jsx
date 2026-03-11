@@ -56,7 +56,7 @@ const HeroSection = () => (
       opacity="0.5"
     />
 
-    <Container maxW="1400px" px={{ base: "6", md: "12" }} position="relative" zIndex="1">
+    <Container maxW="1400px" px={{ base: "6", md: "12" }} position="relative" zIndex="1" pt={{ base: "8", md: "10" }}>
       <Grid
         templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
         minH={{ base: "90vh", md: "95vh" }}
@@ -75,7 +75,7 @@ const HeroSection = () => (
               px="4"
               py="1.5"
             >
-              New Collection 2024
+              New Collection 2026
             </Badge>
 
             <VStack align="flex-start" spacing="4">
@@ -157,8 +157,8 @@ const HeroSection = () => (
 
         {/* Right: Hero image placeholder / product showcase */}
         <GridItem display={{ base: "none", lg: "block" }}>
-          <Box position="relative">
-            <AspectRatio ratio={4 / 5} maxW="500px" mx="auto">
+           <Box position="relative" overflow="hidden" maxW="500px" mx="auto">
+             <AspectRatio ratio={4 / 5}>
               <Box
                 bg="surface.card"
                 borderRadius="none"
@@ -204,27 +204,27 @@ const HeroSection = () => (
                     ₹999
                   </Text>
                 </Box>
+
+                {/* Floating accent card — FIXED: inside image container so it can't overflow */}
+                <Box
+                  position="absolute"
+                  top="4"
+                  right="4"
+                  bg="ink.primary"
+                  color="white"
+                  px="5"
+                  py="4"
+                  w="140px"
+                >
+                  <Text fontSize="2xs" letterSpacing="0.15em" textTransform="uppercase" opacity="0.6" mb="1">
+                    Try at home
+                  </Text>
+                  <Text fontSize="sm" fontWeight="300" lineHeight="1.4">
+                    5 frames, free trial
+                  </Text>
+                </Box>
               </Box>
             </AspectRatio>
-
-            {/* Floating accent card */}
-            <Box
-              position="absolute"
-              top="-4"
-              right="-4"
-              bg="ink.primary"
-              color="white"
-              px="5"
-              py="4"
-              w="140px"
-            >
-              <Text fontSize="2xs" letterSpacing="0.15em" textTransform="uppercase" opacity="0.6" mb="1">
-                Try at home
-              </Text>
-              <Text fontSize="sm" fontWeight="300" lineHeight="1.4">
-                5 frames, free trial
-              </Text>
-            </Box>
           </Box>
         </GridItem>
       </Grid>
@@ -386,14 +386,13 @@ const CategoryGrid = () => (
 
 // ─── Featured Products Strip ──────────────────────────────────────────────────
 const ProductCard = ({ product }) => {
-  // Adjust field names to match your actual product data shape
   const name = product?.name || product?.productName || "Eyewear Frame";
   const price = product?.price || product?.productPrice || 0;
   const image = product?.image || product?.productImage || product?.images?.[0];
   const id = product?._id || product?.id;
 
   return (
-    <Box role="group" cursor="pointer" as={RouterLink} to={`/product/${id}`}>
+    <Box role="group" cursor="pointer" as={RouterLink} to={`/eyeglasses/${id}`}>
       <Box overflow="hidden" bg="surface.card" position="relative" mb="4">
         <AspectRatio ratio={1}>
           <Box>
@@ -487,7 +486,6 @@ const FeaturedProducts = ({ products = [] }) => (
           ))}
         </SimpleGrid>
       ) : (
-        // Skeleton placeholder when no products are loaded yet
         <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} spacing={{ base: "4", md: "6" }}>
           {Array(8).fill(null).map((_, i) => (
             <Box key={i}>
@@ -534,12 +532,11 @@ const USPStrip = () => (
               {usp.icon}
             </Text>
             <Heading
-              fontSize="md"
+              fontSize="xl"
               fontWeight="400"
               color="white"
               mb="2"
               fontFamily="'Cormorant Garamond', serif"
-              fontSize="xl"
             >
               {usp.title}
             </Heading>
@@ -586,7 +583,7 @@ const EditorialBanner = () => (
                 >
                   Summer
                   <br />
-                  Sunglasses '24
+                  Sunglasses '26
                 </Heading>
                 <Button
                   variant="outline"
@@ -686,13 +683,12 @@ const Testimonials = () => (
                 ))}
               </HStack>
               <Text
-                fontSize="sm"
+                fontSize="lg"
                 color="ink.secondary"
                 fontStyle="italic"
                 lineHeight="1.8"
                 mb="6"
                 fontFamily="'Cormorant Garamond', serif"
-                fontSize="lg"
                 fontWeight="300"
               >
                 "{review.text}"
@@ -799,7 +795,7 @@ const Footer = () => (
         gap="4"
       >
         <Text fontSize="2xs" color="whiteAlpha.400" letterSpacing="0.1em">
-          © 2024 CLEAR VISION. All rights reserved.
+          © 2026 CLEAR VISION. All rights reserved.
         </Text>
         <HStack spacing="6">
           {["Privacy Policy", "Terms", "Cookies"].map((item) => (
@@ -816,7 +812,6 @@ const Footer = () => (
 // ─── Main Home Component ───────────────────────────────────────────────────────
 const Home = () => {
   const dispatch = useDispatch();
-  // Adjust selector to match your Redux store shape
   const products = useSelector(
     (state) =>
       state.productReducer?.products ||
@@ -824,7 +819,6 @@ const Home = () => {
   );
 
   useEffect(() => {
-    // Keep your existing dispatch call here, e.g.:
     dispatch(getProducts());
   }, [dispatch]);
 

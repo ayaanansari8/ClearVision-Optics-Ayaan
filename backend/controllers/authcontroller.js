@@ -153,7 +153,7 @@ const forgotPasswordController = async (req, res) => {
 
 
 
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcryptjs")
 
 const hashPassword = async (password) => {
     try {

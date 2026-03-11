@@ -14,11 +14,14 @@ services:
     build: ./backend
     container_name: cleardekho_backend
     ports:
-      - "5000:8080"
+      - "8080:8080"
     depends_on:
       - mongodb
     environment:
-      _MONGO_URL: mongodb://mongodb:27017/cleardekho
+      MONGO_URI: mongodb://mongodb:27017/cleardekho
+      JWT_SECRET: clearvision_secret_key
+      _PORT: 8080
+      _PRIVATE_KEY: clearvision_secret_key
 
   frontend:
     build: ./frontend
