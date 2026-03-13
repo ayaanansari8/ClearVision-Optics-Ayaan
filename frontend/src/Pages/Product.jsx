@@ -1,140 +1,137 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Grid,
-  GridItem,
-  Flex,
-  VStack,
-  HStack,
-  Heading,
-  Text,
-  Button,
-  Badge,
-  Image,
-  Divider,
-  SimpleGrid,
-  AspectRatio,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  Tabs,
-  TabList,
-  Tab,
-  TabPanels,
-  TabPanel,
-  Container,
-  IconButton,
-  useToast,
+  Box, Grid, GridItem, Flex, VStack, HStack, Heading, Text,
+  Image, Divider, SimpleGrid, AspectRatio, IconButton,
+  Container, useToast,
 } from "@chakra-ui/react";
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/cartReducer/action";
 
-const HeartIcon = ({ filled = false, size = 20 }) => (
+const darkStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+  .pd-page { background: #0a0a0a; min-height: 100vh; color: #f5f5f0; }
+
+  /* breadcrumb */
+  .pd-breadcrumb { display: flex; align-items: center; gap: 8px; }
+  .pd-breadcrumb a, .pd-breadcrumb span {
+    font-family: 'DM Sans', sans-serif; font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(245,245,240,0.35); text-decoration: none;
+    transition: color 0.2s;
+  }
+  .pd-breadcrumb a:hover { color: #f5f5f0; }
+  .pd-breadcrumb .sep { color: rgba(255,255,255,0.15); }
+  .pd-breadcrumb .current { color: rgba(245,245,240,0.7); }
+
+  /* tabs */
+  .pd-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 32px; }
+  .pd-tab {
+    font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.25em;
+    text-transform: uppercase; color: rgba(245,245,240,0.3);
+    padding: 14px 0; margin-right: 36px; background: transparent; border: none;
+    cursor: pointer; transition: color 0.2s; position: relative;
+  }
+  .pd-tab.active { color: #f5f5f0; }
+  .pd-tab.active::after {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+    height: 1.5px; background: #C9A84C;
+  }
+
+  /* lens selector */
+  .lens-card {
+    border: 1px solid rgba(255,255,255,0.07); padding: 14px 16px;
+    cursor: pointer; transition: all 0.2s; background: transparent;
+  }
+  .lens-card.selected { border-color: #C9A84C; background: rgba(201,168,76,0.06); }
+  .lens-card:hover { border-color: rgba(201,168,76,0.4); }
+
+  /* spec table */
+  .spec-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .spec-row:nth-child(odd) { background: rgba(255,255,255,0.02); }
+
+  /* related card */
+  .rel-card { cursor: pointer; }
+  .rel-card-img { overflow: hidden; background: #161616; margin-bottom: 10px; }
+  .rel-card-img img { transition: transform 0.5s ease; display: block; }
+  .rel-card:hover .rel-card-img img { transform: scale(1.05); }
+
+  /* wishlist btn */
+  .action-btn {
+    flex: 1; padding: 14px 20px; background: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #f5f5f0; font-family: 'DM Sans', sans-serif;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    cursor: pointer; transition: border-color 0.2s; display: flex;
+    align-items: center; justify-content: center; gap: 8px;
+  }
+  .action-btn:hover { border-color: #C9A84C; }
+  .action-btn.wishlisted { border-color: #ef4444; color: #ef4444; }
+`;
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+const HeartIcon = ({ filled, size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
     <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
   </svg>
 );
-
-const ShareIcon = ({ size = 18 }) => (
+const ShareIcon = ({ size = 14 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
   </svg>
 );
 
-const ZoomIcon = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
-  </svg>
-);
-
+// ─── Image Gallery ────────────────────────────────────────────────────────────
 const ImageGallery = ({ images = [], name = "" }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
-  const displayImages = images.length > 0
-    ? images
-    : ["https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=800&q=80"];
+  const displayImages = images.length > 0 ? images : ["https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=800&q=80"];
 
   const handleMouseMove = (e) => {
     if (!isZoomed) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setMousePos({ x, y });
+    setMousePos({ x: ((e.clientX - rect.left) / rect.width) * 100, y: ((e.clientY - rect.top) / rect.height) * 100 });
   };
 
   return (
     <Box position="sticky" top="24">
       <Box
-        position="relative"
-        overflow="hidden"
-        bg="surface.card"
+        position="relative" overflow="hidden" bg="#111"
+        border="1px solid rgba(255,255,255,0.07)"
         cursor={isZoomed ? "zoom-out" : "zoom-in"}
         onClick={() => setIsZoomed(!isZoomed)}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => isZoomed && setIsZoomed(false)}
       >
         <AspectRatio ratio={1}>
-          <Box>
+          <Box overflow="hidden">
             <Image
-              src={displayImages[activeIdx]}
-              alt={name}
-              objectFit="cover"
-              w="full"
-              h="full"
+              src={displayImages[activeIdx]} alt={name}
+              objectFit="contain" w="full" h="full" p="6"
               transition="transform 0.3s ease"
               transformOrigin={isZoomed ? `${mousePos.x}% ${mousePos.y}%` : "center"}
               transform={isZoomed ? "scale(2)" : "scale(1)"}
+              fallback={<Box w="full" h="full" bg="#161616" display="flex" alignItems="center" justifyContent="center"><Text fontFamily="'DM Sans'" fontSize="xs" color="rgba(245,245,240,0.15)" letterSpacing="0.2em">EYEWEAR</Text></Box>}
             />
           </Box>
         </AspectRatio>
-        <HStack position="absolute" top="4" right="4" spacing="2">
-          <IconButton
-            icon={<ZoomIcon />}
-            size="sm"
-            variant="solid"
-            bg="white"
-            color="ink.primary"
-            _hover={{ bg: "surface.card" }}
-            aria-label="Zoom"
-            borderRadius="none"
-            onClick={(e) => { e.stopPropagation(); setIsZoomed(!isZoomed); }}
-          />
-        </HStack>
-        <Box position="absolute" bottom="4" right="4" bg="white" px="3" py="1">
-          <Text fontSize="2xs" color="ink.muted" letterSpacing="0.1em">
+        <Box position="absolute" bottom="4" right="4" bg="rgba(10,10,10,0.8)" px="3" py="1" border="1px solid rgba(255,255,255,0.07)">
+          <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="rgba(245,245,240,0.4)" letterSpacing="0.1em">
             {activeIdx + 1} / {displayImages.length}
           </Text>
         </Box>
       </Box>
-
       {displayImages.length > 1 && (
         <HStack spacing="2" mt="3">
           {displayImages.map((img, i) => (
-            <Box
-              key={i}
-              w="16" h="16"
-              overflow="hidden"
-              cursor="pointer"
-              border="1.5px solid"
-              borderColor={activeIdx === i ? "ink.primary" : "transparent"}
-              transition="border-color 0.2s"
-              onClick={() => setActiveIdx(i)}
-              flex="0 0 auto"
-            >
-              <Image
-                src={img}
-                alt={`View ${i + 1}`}
-                objectFit="cover"
-                w="full" h="full"
-                opacity={activeIdx === i ? 1 : 0.6}
-                transition="opacity 0.2s"
-                _hover={{ opacity: 1 }}
-              />
+            <Box key={i} w="16" h="16" overflow="hidden" cursor="pointer"
+              border="1.5px solid" borderColor={activeIdx === i ? "#C9A84C" : "rgba(255,255,255,0.07)"}
+              transition="border-color 0.2s" onClick={() => setActiveIdx(i)} flex="0 0 auto" bg="#111">
+              <Image src={img} alt={`View ${i + 1}`} objectFit="contain" w="full" h="full" p="1"
+                opacity={activeIdx === i ? 1 : 0.4} transition="opacity 0.2s" _hover={{ opacity: 1 }} />
             </Box>
           ))}
         </HStack>
@@ -143,428 +140,340 @@ const ImageGallery = ({ images = [], name = "" }) => {
   );
 };
 
+// ─── Config ───────────────────────────────────────────────────────────────────
 const frameColors = [
   { name: "Matte Black", hex: "#1a1a1a" },
-  { name: "Tortoise", hex: "#7B4F2E" },
-  { name: "Gold", hex: "#C9A84C" },
-  { name: "Crystal", hex: "#E8E8E8" },
+  { name: "Tortoise",    hex: "#7B4F2E" },
+  { name: "Gold",        hex: "#C9A84C" },
+  { name: "Crystal",     hex: "#d4d4d4" },
 ];
-
 const lensTypes = [
-  { id: "clear", label: "Clear", price: 0 },
-  { id: "antiglare", label: "Anti-Glare", price: 500 },
-  { id: "bluelight", label: "Blue Light", price: 800 },
+  { id: "clear",        label: "Clear",        price: 0    },
+  { id: "antiglare",    label: "Anti-Glare",   price: 500  },
+  { id: "bluelight",    label: "Blue Light",   price: 800  },
   { id: "photochromic", label: "Photochromic", price: 1500 },
 ];
 
-const ProductInfo = ({ product, onAddToCart, onAddToWishlist }) => {
+// ─── Product Info ─────────────────────────────────────────────────────────────
+const ProductInfo = ({ product, onAddToCart }) => {
   const [selectedColor, setSelectedColor] = useState(0);
-  const [selectedLens, setSelectedLens] = useState("clear");
-  const [wishlisted, setWishlisted] = useState(false);
+  const [selectedLens, setSelectedLens]   = useState("clear");
+  const [wishlisted, setWishlisted]       = useState(false);
   const toast = useToast();
 
-  const name = product?.name || product?.productName || "Premium Eyewear Frame";
-  const price = product?.price || product?.discountPrice || product?.mrp || product?.sellingPrice || product?.productPrice || 0;
+  const name          = product?.name || product?.productName || "Premium Eyewear Frame";
+  const price         = product?.price || product?.discountPrice || product?.productPrice || 0;
   const originalPrice = product?.originalPrice || product?.mrp;
-  const discount = originalPrice && originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : null;
-  const brand = product?.brand || product?.brandName || "ClearDekho";
-  const sku = product?.sku || product?._id?.slice(-8).toUpperCase() || "CD00001";
-  const inStock = product?.stock !== 0 && product?.inStock !== false;
-
-  const lensAddon = lensTypes.find((l) => l.id === selectedLens)?.price || 0;
-  const totalPrice = price + lensAddon;
+  const discount      = originalPrice && originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : null;
+  const brand         = product?.brand || product?.brandName || "ClearDekho";
+  const sku           = product?.sku || product?._id?.slice(-8).toUpperCase() || "CD00001";
+  const inStock       = product?.stock !== 0 && product?.inStock !== false;
+  const lensAddon     = lensTypes.find((l) => l.id === selectedLens)?.price || 0;
+  const totalPrice    = price + lensAddon;
 
   const handleAddToCart = () => {
     if (onAddToCart) onAddToCart(product);
-    toast({
-      title: "Added to cart",
-      description: `${name} has been added to your cart.`,
-      status: "success",
-      duration: 2500,
-      isClosable: true,
-      position: "bottom-right",
-    });
-  };
-
-  const handleWishlist = () => {
-    setWishlisted(!wishlisted);
-    if (onAddToWishlist) onAddToWishlist(product);
+    toast({ title: "Added to cart", description: `${name} added.`, status: "success", duration: 2500, isClosable: true, position: "bottom-right" });
   };
 
   return (
     <VStack align="flex-start" spacing="0">
-      <HStack spacing="3" mb="3">
-        <Text fontSize="2xs" color="ink.muted" letterSpacing="0.2em" textTransform="uppercase" fontWeight="500">
-          {brand}
-        </Text>
-        {discount && (
-          <Badge bg="accent.gold" color="white" fontSize="2xs" letterSpacing="0.1em">
-            −{discount}%
-          </Badge>
-        )}
-        {inStock ? (
-          <Badge bg="green.50" color="green.600" fontSize="2xs" borderColor="green.200" variant="outline">In Stock</Badge>
-        ) : (
-          <Badge bg="red.50" color="red.500" fontSize="2xs" borderColor="red.200" variant="outline">Out of Stock</Badge>
-        )}
+      {/* Brand + badges */}
+      <HStack spacing="3" mb="4">
+        <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="#C9A84C" letterSpacing="0.3em" textTransform="uppercase">{brand}</Text>
+        {inStock
+          ? <Box px="2" py="0.5" border="1px solid rgba(52,211,153,0.4)"><Text fontFamily="'DM Sans', sans-serif" fontSize="9px" letterSpacing="0.2em" textTransform="uppercase" color="#34d399">In Stock</Text></Box>
+          : <Box px="2" py="0.5" border="1px solid rgba(239,68,68,0.4)"><Text fontFamily="'DM Sans', sans-serif" fontSize="9px" letterSpacing="0.2em" textTransform="uppercase" color="#ef4444">Out of Stock</Text></Box>
+        }
+        {discount && <Box px="2" py="0.5" bg="#C9A84C"><Text fontFamily="'DM Sans', sans-serif" fontSize="9px" letterSpacing="0.15em" color="#0a0a0a" fontWeight="600">−{discount}%</Text></Box>}
       </HStack>
 
-      <Heading
-        fontSize={{ base: "2xl", md: "3xl" }}
-        fontWeight="400"
-        color="ink.primary"
-        lineHeight="1.15"
-        mb="5"
-        fontFamily="'Cormorant Garamond', serif"
-        letterSpacing="-0.01em"
-      >
+      {/* Name */}
+      <Text fontFamily="'Cormorant Garamond', serif" fontSize={{ base: "2xl", md: "3xl" }} fontWeight="300" color="#f5f5f0" lineHeight="1.2" mb="5" letterSpacing="-0.01em">
         {name}
-      </Heading>
+      </Text>
 
+      {/* Price */}
       <HStack align="baseline" spacing="3" mb="6">
-        <Text fontSize="3xl" fontFamily="'Cormorant Garamond', serif" fontWeight="500" color="ink.primary" lineHeight="1">
+        <Text fontFamily="'Bebas Neue', sans-serif" fontSize="52px" color="#C9A84C" letterSpacing="0.04em" lineHeight="1">
           ₹{totalPrice.toLocaleString()}
         </Text>
         {originalPrice && originalPrice > price && (
-          <Text fontSize="md" color="ink.muted" textDecoration="line-through" fontWeight="300">
-            ₹{originalPrice.toLocaleString()}
-          </Text>
+          <Text fontFamily="'DM Sans', sans-serif" fontSize="sm" color="rgba(245,245,240,0.3)" textDecoration="line-through">₹{originalPrice.toLocaleString()}</Text>
         )}
-        {lensAddon > 0 && (
-          <Text fontSize="xs" color="ink.muted">(incl. lens upgrade)</Text>
-        )}
+        {lensAddon > 0 && <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="rgba(245,245,240,0.35)">incl. lens</Text>}
       </HStack>
 
-      <Divider borderColor="surface.border" mb="6" />
+      <Divider borderColor="rgba(255,255,255,0.07)" mb="6" />
 
-      <VStack align="flex-start" spacing="3" mb="6" w="full">
-        <HStack spacing="2">
-          <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.12em" color="ink.muted">Frame Colour:</Text>
-          <Text fontSize="xs" color="ink.primary" fontWeight="500">{frameColors[selectedColor].name}</Text>
+      {/* Color picker */}
+      <Box mb="6" w="full">
+        <HStack spacing="2" mb="3">
+          <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" letterSpacing="0.2em" textTransform="uppercase" color="rgba(245,245,240,0.35)">Frame Colour:</Text>
+          <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="#f5f5f0" letterSpacing="0.1em">{frameColors[selectedColor].name}</Text>
         </HStack>
         <HStack spacing="3">
-          {frameColors.map((color, i) => (
-            <Box
-              key={color.name}
-              w="8" h="8"
-              bg={color.hex}
-              cursor="pointer"
-              border="2px solid"
-              borderColor={selectedColor === i ? "ink.primary" : "transparent"}
-              outline="1px solid"
-              outlineColor="surface.border"
-              transition="border-color 0.2s, transform 0.2s"
+          {frameColors.map((c, i) => (
+            <Box key={c.name} w="8" h="8" bg={c.hex} cursor="pointer"
+              border="2px solid" borderColor={selectedColor === i ? "#C9A84C" : "transparent"}
+              outline="1px solid" outlineColor="rgba(255,255,255,0.1)"
+              transition="transform 0.2s, border-color 0.2s"
               _hover={{ transform: "scale(1.1)" }}
-              title={color.name}
-              onClick={() => setSelectedColor(i)}
+              title={c.name} onClick={() => setSelectedColor(i)}
             />
           ))}
         </HStack>
-      </VStack>
+      </Box>
 
-      <VStack align="flex-start" spacing="3" mb="8" w="full">
-        <Text fontSize="xs" textTransform="uppercase" letterSpacing="0.12em" color="ink.muted">Lens Type:</Text>
+      {/* Lens selector */}
+      <Box mb="8" w="full">
+        <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" letterSpacing="0.2em" textTransform="uppercase" color="rgba(245,245,240,0.35)" mb="3">Lens Type:</Text>
         <SimpleGrid columns={2} spacing="2" w="full">
           {lensTypes.map((lens) => (
-            <Box
-              key={lens.id}
-              border="1px solid"
-              borderColor={selectedLens === lens.id ? "ink.primary" : "surface.border"}
-              p="3"
-              cursor="pointer"
-              transition="all 0.2s"
-              bg={selectedLens === lens.id ? "ink.primary" : "transparent"}
-              onClick={() => setSelectedLens(lens.id)}
-              _hover={{ borderColor: "ink.primary" }}
-            >
-              <Text fontSize="xs" fontWeight="400" color={selectedLens === lens.id ? "white" : "ink.primary"} letterSpacing="0.05em">
-                {lens.label}
-              </Text>
-              <Text fontSize="2xs" color={selectedLens === lens.id ? "whiteAlpha.700" : "ink.muted"}>
+            <div key={lens.id} className={`lens-card ${selectedLens === lens.id ? 'selected' : ''}`} onClick={() => setSelectedLens(lens.id)}>
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="#f5f5f0" mb="1">{lens.label}</Text>
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color={selectedLens === lens.id ? "#C9A84C" : "rgba(245,245,240,0.3)"}>
                 {lens.price === 0 ? "Included" : `+₹${lens.price}`}
               </Text>
-            </Box>
+            </div>
           ))}
         </SimpleGrid>
-      </VStack>
+      </Box>
 
+      {/* CTAs */}
       <VStack spacing="3" w="full" mb="6">
-        <Button
-          variant="solid"
-          size="lg"
-          w="full"
-          isDisabled={!inStock}
-          onClick={handleAddToCart}
-          h="14"
-          fontSize="xs"
-          letterSpacing="0.15em"
+        <button
+          disabled={!inStock} onClick={handleAddToCart}
+          style={{
+            width: '100%', background: inStock ? '#C9A84C' : 'rgba(255,255,255,0.05)',
+            color: inStock ? '#0a0a0a' : 'rgba(245,245,240,0.2)',
+            border: 'none', fontFamily: "'DM Sans', sans-serif",
+            fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase',
+            fontWeight: 500, padding: '18px 24px',
+            cursor: inStock ? 'pointer' : 'not-allowed', transition: 'background 0.2s',
+          }}
+          onMouseOver={(e) => inStock && (e.currentTarget.style.background = '#f5f5f0')}
+          onMouseOut={(e) => inStock && (e.currentTarget.style.background = '#C9A84C')}
         >
           {inStock ? "Add to Cart" : "Out of Stock"}
-        </Button>
+        </button>
         <HStack w="full" spacing="3">
-          <Button
-            variant="outline"
-            size="md"
-            flex="1"
-            onClick={handleWishlist}
-            leftIcon={<HeartIcon size={15} filled={wishlisted} />}
-            color={wishlisted ? "red.400" : "ink.primary"}
-            borderColor={wishlisted ? "red.200" : "ink.primary"}
+          <button
+            className={`action-btn ${wishlisted ? 'wishlisted' : ''}`}
+            onClick={() => setWishlisted(!wishlisted)}
           >
+            <HeartIcon filled={wishlisted} size={13} />
             {wishlisted ? "Wishlisted" : "Wishlist"}
-          </Button>
-          <IconButton
-            icon={<ShareIcon />}
-            variant="outline"
-            size="md"
-            aria-label="Share"
-            color="ink.secondary"
-            onClick={() => { navigator.share?.({ title: name, url: window.location.href }); }}
-          />
+          </button>
+          <button
+            className="action-btn"
+            style={{ flex: 'none', padding: '14px 16px' }}
+            onClick={() => navigator.share?.({ title: name, url: window.location.href })}
+          >
+            <ShareIcon size={13} />
+          </button>
         </HStack>
       </VStack>
 
-      <Box w="full" bg="surface.warm" p="5" border="1px solid" borderColor="surface.border" mb="6">
-        <Text fontSize="xs" fontWeight="500" color="ink.primary" letterSpacing="0.08em" textTransform="uppercase" mb="3">
-          Available Offers
-        </Text>
-        <VStack align="flex-start" spacing="2">
-          {[
-            "10% off on first order with code FIRST10",
-            "Free home trial — try before you buy",
-            "EMI available on orders above ₹3,000",
-          ].map((offer) => (
+      {/* Offers */}
+      <Box w="full" bg="#111" p="5" border="1px solid rgba(255,255,255,0.07)" mb="6">
+        <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" letterSpacing="0.2em" textTransform="uppercase" color="rgba(245,245,240,0.35)" mb="4">Available Offers</Text>
+        <VStack align="flex-start" spacing="3">
+          {["10% off on first order with code FIRST10", "Free home trial — try before you buy", "EMI available on orders above ₹3,000"].map((offer) => (
             <HStack key={offer} spacing="3" align="flex-start">
-              <Text color="accent.gold" fontSize="xs" mt="0.5">✦</Text>
-              <Text fontSize="xs" color="ink.secondary" lineHeight="1.6">{offer}</Text>
+              <Text color="#C9A84C" fontSize="10px" mt="0.5" flexShrink="0">✦</Text>
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="rgba(245,245,240,0.45)" lineHeight="1.7">{offer}</Text>
             </HStack>
           ))}
         </VStack>
       </Box>
 
-      <Text fontSize="2xs" color="ink.muted" letterSpacing="0.1em">SKU: {sku}</Text>
+      <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="rgba(245,245,240,0.2)" letterSpacing="0.15em">SKU: {sku}</Text>
     </VStack>
   );
 };
 
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
 const ProductTabs = ({ product }) => {
-  const description = product?.description || product?.productDescription || "Premium quality eyewear frame crafted with attention to detail. Lightweight design for all-day comfort.";
-
+  const [activeTab, setActiveTab] = useState(0);
+  const description = product?.description || "Premium quality eyewear frame crafted with attention to detail. Lightweight design for all-day comfort.";
   const specs = [
-    { label: "Frame Material", value: product?.material || "Acetate" },
-    { label: "Frame Width", value: product?.frameWidth || "140mm" },
-    { label: "Bridge Width", value: product?.bridgeWidth || "18mm" },
-    { label: "Temple Length", value: product?.templeLength || "145mm" },
-    { label: "Lens Width", value: product?.lensWidth || "52mm" },
-    { label: "Frame Shape", value: product?.shape || "Rectangle" },
-    { label: "Gender", value: product?.gender || "Unisex" },
-    { label: "Weight", value: product?.weight || "18g" },
+    ["Frame Material", product?.material || "Acetate"],
+    ["Frame Width",    product?.frameWidth || "140mm"],
+    ["Bridge Width",   product?.bridgeWidth || "18mm"],
+    ["Temple Length",  product?.templeLength || "145mm"],
+    ["Lens Width",     product?.lensWidth || "52mm"],
+    ["Frame Shape",    product?.shape || "Rectangle"],
+    ["Gender",         product?.gender || "Unisex"],
+    ["Weight",         product?.weight || "18g"],
   ];
+  const tabs = ["Description", "Specifications", "Shipping & Returns"];
 
   return (
     <Box mt="16">
-      <Tabs variant="unstyled" colorScheme="brand">
-        <TabList borderBottom="1px solid" borderColor="surface.border">
-          {["Description", "Specifications", "Shipping & Returns"].map((tab) => (
-            <Tab
-              key={tab}
-              fontSize="xs"
-              letterSpacing="0.12em"
-              textTransform="uppercase"
-              fontFamily="'DM Sans', sans-serif"
-              color="ink.muted"
-              pb="4"
-              mr="8"
-              _selected={{ color: "ink.primary", borderBottom: "1.5px solid", borderColor: "ink.primary", mb: "-1px" }}
-              _hover={{ color: "ink.secondary" }}
-            >
-              {tab}
-            </Tab>
+      <div className="pd-tabs">
+        {tabs.map((t, i) => (
+          <button key={t} className={`pd-tab ${activeTab === i ? 'active' : ''}`} onClick={() => setActiveTab(i)}>{t}</button>
+        ))}
+      </div>
+
+      {activeTab === 0 && (
+        <Text fontFamily="'DM Sans', sans-serif" fontSize="13px" color="rgba(245,245,240,0.5)" lineHeight="2" maxW="680px" fontWeight="300">{description}</Text>
+      )}
+
+      {activeTab === 1 && (
+        <Box maxW="560px" border="1px solid rgba(255,255,255,0.07)">
+          {specs.map(([label, val], i) => (
+            <div key={label} className="spec-row">
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="11px" color="rgba(245,245,240,0.35)" letterSpacing="0.08em">{label}</Text>
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="11px" color="#f5f5f0">{val}</Text>
+            </div>
           ))}
-        </TabList>
-        <TabPanels>
-          <TabPanel px="0" py="8">
-            <Text fontSize="sm" color="ink.secondary" lineHeight="1.9" maxW="680px" fontWeight="300">
-              {description}
-            </Text>
-          </TabPanel>
-          <TabPanel px="0" py="8">
-            <SimpleGrid columns={{ base: 1, sm: 2 }} spacing="0" maxW="580px">
-              {specs.map((spec, i) => (
-                <Flex
-                  key={spec.label}
-                  py="3" px="4"
-                  bg={i % 2 === 0 ? "surface.warm" : "white"}
-                  justify="space-between"
-                  align="center"
-                  border="1px solid"
-                  borderColor="surface.border"
-                  mt="-1px" ml="-1px"
-                >
-                  <Text fontSize="xs" color="ink.muted" letterSpacing="0.05em">{spec.label}</Text>
-                  <Text fontSize="xs" color="ink.primary" fontWeight="500">{spec.value}</Text>
-                </Flex>
-              ))}
-            </SimpleGrid>
-          </TabPanel>
-          <TabPanel px="0" py="8">
-            <VStack align="flex-start" spacing="6" maxW="580px">
-              {[
-                { title: "Delivery", desc: "Free standard delivery on all orders above ₹999. Express delivery (2-3 days) available for ₹99." },
-                { title: "Home Trial", desc: "Order up to 5 frames for a free 7-day home trial. Pay only for what you keep." },
-                { title: "Returns", desc: "30-day hassle-free returns. If you're not satisfied, return for a full refund or exchange." },
-                { title: "Warranty", desc: "1-year manufacturer warranty on all frames. Covers manufacturing defects." },
-              ].map((item) => (
-                <Box key={item.title}>
-                  <Text fontSize="sm" fontWeight="500" color="ink.primary" mb="1.5" letterSpacing="0.03em">{item.title}</Text>
-                  <Text fontSize="sm" color="ink.secondary" lineHeight="1.8" fontWeight="300">{item.desc}</Text>
-                </Box>
-              ))}
-            </VStack>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
+        </Box>
+      )}
+
+      {activeTab === 2 && (
+        <VStack align="flex-start" spacing="6" maxW="580px">
+          {[
+            ["Delivery", "Free standard delivery on all orders above ₹999. Express delivery (2-3 days) available for ₹99."],
+            ["Home Trial", "Order up to 5 frames for a free 7-day home trial. Pay only for what you keep."],
+            ["Returns", "30-day hassle-free returns. Return for a full refund or exchange."],
+            ["Warranty", "1-year manufacturer warranty on all frames. Covers manufacturing defects."],
+          ].map(([title, desc]) => (
+            <Box key={title}>
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="11px" letterSpacing="0.15em" textTransform="uppercase" color="#C9A84C" mb="2">{title}</Text>
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="13px" color="rgba(245,245,240,0.45)" lineHeight="1.9" fontWeight="300">{desc}</Text>
+            </Box>
+          ))}
+        </VStack>
+      )}
     </Box>
   );
 };
 
+// ─── Related Products ─────────────────────────────────────────────────────────
 const RelatedProducts = ({ products = [] }) => {
   if (!products.length) return null;
   return (
-    <Box py="16" bg="surface.warm">
-      <Container maxW="1400px" px={{ base: "6", md: "12" }}>
+    <Box py="16" bg="#111" borderTop="1px solid rgba(255,255,255,0.07)">
+      <Box maxW="1400px" mx="auto" px={{ base: "6", md: "12" }}>
         <Flex justify="space-between" align="center" mb="10">
-          <Heading fontSize={{ base: "2xl", md: "3xl" }} fontWeight="300" letterSpacing="-0.02em">
-            You May Also Like
-          </Heading>
-          <Button variant="ghost" size="sm" as={RouterLink} to="/eyeglasses" fontSize="xs" letterSpacing="0.1em" textTransform="uppercase" rightIcon={<Text>→</Text>}>
-            View All
-          </Button>
+          <Text fontFamily="'Bebas Neue', sans-serif" fontSize="clamp(32px,4vw,48px)" letterSpacing="0.02em" color="#f5f5f0">You May Also Like</Text>
+          <RouterLink to="/eyeglasses">
+            <button style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(245,245,240,0.4)', fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '10px 18px', cursor: 'pointer' }}>
+              View All →
+            </button>
+          </RouterLink>
         </Flex>
         <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: "4", md: "6" }}>
           {products.slice(0, 4).map((p) => (
             <RouterLink key={p._id || p.id} to={`/eyeglasses/${p._id || p.id}`}>
-              <Box role="group" cursor="pointer">
-                <Box overflow="hidden" bg="surface.card" mb="3">
+              <div className="rel-card">
+                <div className="rel-card-img">
                   <AspectRatio ratio={1}>
-                    <Image
-                      src={p.image || p.productImage || p.images?.[0]}
-                      alt={p.name || p.productName}
-                      objectFit="cover"
-                      transition="transform 0.5s ease"
-                      _groupHover={{ transform: "scale(1.05)" }}
-                      fallback={<Box bg="surface.card" w="full" h="full" />}
-                    />
+                    <Box overflow="hidden">
+                      <Image src={p.image || p.images?.[0]} alt={p.name} objectFit="contain" w="full" h="full" p="3"
+                        fallback={<Box w="full" h="full" bg="#161616" />} />
+                    </Box>
                   </AspectRatio>
-                </Box>
-                <Text fontSize="sm" color="ink.primary" noOfLines={1} mb="1">{p.name || p.productName}</Text>
-                <Text fontSize="sm" fontWeight="500" color="ink.primary">
-                  ₹{(p.price || p.discountPrice || p.mrp || p.productPrice || 0).toLocaleString()}
+                </div>
+                <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="rgba(245,245,240,0.7)" noOfLines={1} mb="1">{p.name || p.productName}</Text>
+                <Text fontFamily="'Bebas Neue', sans-serif" fontSize="20px" color="#C9A84C" letterSpacing="0.04em" lineHeight="1">
+                  ₹{(p.price || p.productPrice || 0).toLocaleString()}
                 </Text>
-              </Box>
+              </div>
             </RouterLink>
           ))}
         </SimpleGrid>
-      </Container>
+      </Box>
     </Box>
   );
 };
 
+// ─── Main ─────────────────────────────────────────────────────────────────────
 const ProductDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
 
-  const allProducts = useSelector(
-    (state) => state.products?.products || state.productReducer?.products || []
-  );
+  const allProducts = useSelector((state) => state.productReducer?.products || []);
+  const product = allProducts.find((p) => (p._id || p.id) === id) || null;
+  const loading = useSelector((state) => state.productReducer?.isLoading || false);
 
-  const product = allProducts.find(p => (p._id || p.id) === id) || null;
-
-  const loading = useSelector(
-    (state) => state.product?.loading || state.productReducer?.loading || false
-  );
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [id]);
+  useEffect(() => { window.scrollTo(0, 0); }, [id]);
 
   const images = product?.images || (product?.image ? [product.image] : []);
-  const relatedProducts = allProducts.filter(
-    (p) => (p._id || p.id) !== id && p.category === product?.category
-  );
+  const relatedProducts = allProducts.filter((p) => (p._id || p.id) !== id).slice(0, 4);
 
   const handleAddToCart = (item) => {
-    const productToAdd = item || product;
-    if (!productToAdd) return;
+    const p = item || product;
+    if (!p) return;
     dispatch(addToCart({
-      ...productToAdd,
-      price: productToAdd.price || productToAdd.discountPrice || productToAdd.mrp || productToAdd.sellingPrice || productToAdd.productPrice || 0,
-      image: productToAdd.image || productToAdd.images?.[0] || productToAdd.productImage || "",
-      name: productToAdd.name || productToAdd.productName || "Eyewear Frame",
+      ...p,
+      price: p.price || p.productPrice || 0,
+      image: p.image || p.images?.[0] || "",
+      name: p.name || p.productName || "Eyewear Frame",
     }));
-  };
-
-  const handleAddToWishlist = (item) => {
-    console.log("Wishlist:", item);
   };
 
   if (loading) {
     return (
-      <Container maxW="1400px" px={{ base: "6", md: "12" }} py="20">
-        <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap="16">
-          <Box bg="surface.card" h="500px" />
-          <VStack align="flex-start" spacing="4">
-            {[200, 300, 150, 100, 200].map((w, i) => (
-              <Box key={i} bg="surface.card" h="4" w={`${w}px`} maxW="full" />
-            ))}
-          </VStack>
-        </Grid>
-      </Container>
+      <Box className="pd-page" style={{ background: '#0a0a0a' }}>
+        <style>{darkStyles}</style>
+        <Box maxW="1400px" mx="auto" px={{ base: "6", md: "12" }} py="20">
+          <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap="16">
+            <Box bg="#161616" h="500px" />
+            <VStack align="flex-start" spacing="4">
+              {[200, 300, 150, 100, 200].map((w, i) => <Box key={i} bg="#161616" h="4" w={`${w}px`} maxW="full" />)}
+            </VStack>
+          </Grid>
+        </Box>
+      </Box>
     );
   }
 
   if (!product) {
     return (
-      <Container maxW="1400px" px={{ base: "6", md: "12" }} py="20">
-        <VStack spacing="4">
-          <Text fontSize="xl" color="ink.primary">Product not found.</Text>
-          <Button as={RouterLink} to="/eyeglasses" variant="solid">Browse Eyeglasses</Button>
+      <Box className="pd-page" display="flex" alignItems="center" justifyContent="center" minH="80vh">
+        <style>{darkStyles}</style>
+        <VStack spacing="5" textAlign="center">
+          <Text fontFamily="'Cormorant Garamond', serif" fontSize="3xl" color="rgba(245,245,240,0.2)" fontWeight="300">Product not found</Text>
+          <RouterLink to="/eyeglasses">
+            <button style={{ background: '#C9A84C', border: 'none', color: '#0a0a0a', fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 500, padding: '14px 28px', cursor: 'pointer' }}>
+              Browse Eyeglasses →
+            </button>
+          </RouterLink>
         </VStack>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Box bg="white">
-      <Box borderBottom="1px solid" borderColor="surface.border" bg="surface.warm" py="3">
-        <Container maxW="1400px" px={{ base: "6", md: "12" }}>
-          <Breadcrumb spacing="2" separator={<Text color="ink.muted" fontSize="xs">/</Text>} fontSize="xs" color="ink.muted">
-            <BreadcrumbItem>
-              <BreadcrumbLink as={RouterLink} to="/" _hover={{ color: "ink.primary" }}>Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem>
-              <BreadcrumbLink as={RouterLink} to="/eyeglasses" _hover={{ color: "ink.primary" }}>Eyeglasses</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbItem isCurrentPage>
-              <Text color="ink.primary" noOfLines={1} maxW="200px">
-                {product?.name || product?.productName || "Product"}
-              </Text>
-            </BreadcrumbItem>
-          </Breadcrumb>
-        </Container>
+    <Box className="pd-page">
+      <style>{darkStyles}</style>
+
+      {/* Breadcrumb */}
+      <Box borderBottom="1px solid rgba(255,255,255,0.07)" py="4" px={{ base: "6", md: "12" }} maxW="1400px" mx="auto">
+        <div className="pd-breadcrumb">
+          <RouterLink to="/">Home</RouterLink>
+          <span className="sep">/</span>
+          <RouterLink to="/eyeglasses">Eyeglasses</RouterLink>
+          <span className="sep">/</span>
+          <span className="current">{product?.name || "Product"}</span>
+        </div>
       </Box>
 
-      <Container maxW="1400px" px={{ base: "6", md: "12" }} py={{ base: "10", md: "16" }}>
+      {/* Main content */}
+      <Box maxW="1400px" mx="auto" px={{ base: "6", md: "12" }} py={{ base: "10", md: "16" }}>
         <Grid templateColumns={{ base: "1fr", lg: "1fr 1fr" }} gap={{ base: "10", lg: "20" }}>
           <GridItem>
             <ImageGallery images={images} name={product?.name || product?.productName} />
           </GridItem>
           <GridItem>
-            <ProductInfo product={product} onAddToCart={handleAddToCart} onAddToWishlist={handleAddToWishlist} />
+            <ProductInfo product={product} onAddToCart={handleAddToCart} />
           </GridItem>
         </Grid>
         <ProductTabs product={product} />
-      </Container>
+      </Box>
 
       <RelatedProducts products={relatedProducts} />
     </Box>

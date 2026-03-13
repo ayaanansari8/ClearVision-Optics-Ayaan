@@ -1,111 +1,90 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  Box,
-  Container,
-  Heading,
-  Text,
-  VStack,
-  HStack,
-  Image,
-  Badge,
-  Divider,
-  Spinner,
-  Center,
-  Icon,
-  SimpleGrid,
-  Flex,
+  Box, Text, VStack, HStack, Image, Divider,
+  Spinner, Flex, SimpleGrid,
 } from "@chakra-ui/react";
 import { FiPackage, FiClock, FiCheckCircle, FiTruck } from "react-icons/fi";
 
+const darkStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+  .mo-page { background: #0a0a0a; min-height: 100vh; color: #f5f5f0; }
+  .mo-card {
+    background: #111; border: 1px solid rgba(255,255,255,0.07);
+    transition: border-color 0.2s;
+  }
+  .mo-card:hover { border-color: rgba(201,168,76,0.3); }
+  .mo-stat { background: #111; border: 1px solid rgba(255,255,255,0.07); padding: 24px 28px; }
+`;
+
 const statusConfig = {
-  Placed: { color: "blue", icon: FiClock, label: "Order Placed" },
-  Processing: { color: "yellow", icon: FiPackage, label: "Processing" },
-  Shipped: { color: "purple", icon: FiTruck, label: "Shipped" },
-  Delivered: { color: "green", icon: FiCheckCircle, label: "Delivered" },
+  Placed:     { color: '#C9A84C', label: 'Placed',     icon: FiClock },
+  Processing: { color: '#60a5fa', label: 'Processing', icon: FiPackage },
+  Shipped:    { color: '#a78bfa', label: 'Shipped',    icon: FiTruck },
+  Delivered:  { color: '#34d399', label: 'Delivered',  icon: FiCheckCircle },
 };
 
 const OrderCard = ({ order }) => {
-  const status = statusConfig[order.status] || statusConfig["Placed"];
+  const status = statusConfig[order.status] || statusConfig['Placed'];
+  const StatusIcon = status.icon;
 
   return (
-    <Box
-      bg="white"
-      border="1px solid"
-      borderColor="gray.100"
-      borderRadius="xl"
-      overflow="hidden"
-      boxShadow="sm"
-      _hover={{ boxShadow: "md", transform: "translateY(-2px)", transition: "all 0.2s" }}
-      transition="all 0.2s"
-    >
-      <HStack spacing={0} align="stretch">
-        <Box w="140px" minW="140px" bg="gray.50" p={3}>
+    <div className="mo-card">
+      <Flex>
+        {/* Image */}
+        <Box w="120px" minW="120px" bg="#161616" flexShrink="0">
           <Image
             src={order.image}
             alt={order.title}
-            w="100%"
-            h="110px"
+            w="full" h="100px"
             objectFit="contain"
-            fallbackSrc="https://via.placeholder.com/140x110?text=No+Image"
+            p="3"
+            fallback={
+              <Box w="full" h="100px" bg="#161616" display="flex" alignItems="center" justifyContent="center">
+                <Text fontSize="9px" color="rgba(245,245,240,0.2)" letterSpacing="0.2em" fontFamily="'DM Sans'">NO IMAGE</Text>
+              </Box>
+            }
           />
         </Box>
 
-        <Box flex={1} p={4}>
-          <Flex justify="space-between" align="flex-start">
-            <Box flex={1} mr={3}>
-              <Text
-                fontWeight="600"
-                fontSize="md"
-                color="gray.800"
-                noOfLines={2}
-                lineHeight="1.4"
-              >
+        {/* Info */}
+        <Box flex="1" p="5">
+          <Flex justify="space-between" align="flex-start" mb="3">
+            <Box flex="1" mr="4">
+              <Text fontFamily="'Cormorant Garamond', serif" fontSize="lg" fontWeight="400" color="#f5f5f0" lineHeight="1.3" mb="2">
                 {order.title}
               </Text>
-              <HStack spacing={4} mt={2}>
-                <Text fontSize="sm" color="gray.500">
-                  Qty: <Text as="span" fontWeight="600" color="gray.700">{order.quantity}</Text>
+              <HStack spacing="4">
+                <Text fontFamily="'DM Sans', sans-serif" fontSize="11px" color="rgba(245,245,240,0.4)">
+                  Qty: <span style={{ color: '#f5f5f0' }}>{order.quantity}</span>
                 </Text>
-                <Text fontSize="sm" color="gray.500">
-                  Price: <Text as="span" fontWeight="700" color="teal.600">₹{order.price}</Text>
+                <Text fontFamily="'DM Sans', sans-serif" fontSize="11px" color="rgba(245,245,240,0.4)">
+                  {order.paymentMethod && `via ${order.paymentMethod.toUpperCase()}`}
                 </Text>
               </HStack>
-              {order.paymentMethod && (
-                <Text fontSize="xs" color="gray.400" mt={1}>
-                  Payment: {order.paymentMethod}
-                </Text>
-              )}
             </Box>
-
-            <Badge
-              colorScheme={status.color}
-              px={3}
-              py={1}
-              borderRadius="full"
-              fontSize="xs"
-              fontWeight="600"
-            >
-              <HStack spacing={1}>
-                <Icon as={status.icon} boxSize={3} />
-                <Text>{order.status || "Placed"}</Text>
-              </HStack>
-            </Badge>
+            {/* Status badge */}
+            <HStack spacing="2" px="3" py="1.5" border="1px solid" borderColor={status.color} flexShrink="0">
+              <StatusIcon size={11} color={status.color} />
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" letterSpacing="0.15em" textTransform="uppercase" color={status.color} fontWeight="500">
+                {order.status || 'Placed'}
+              </Text>
+            </HStack>
           </Flex>
 
-          <Divider mt={3} mb={2} />
+          <Divider borderColor="rgba(255,255,255,0.07)" mb="3" />
 
-          <HStack justify="space-between">
-            <Text fontSize="xs" color="gray.400">
-              Customer: {order.userName}
+          <Flex justify="space-between" align="center">
+            <Text fontFamily="'DM Sans', sans-serif" fontSize="11px" color="rgba(245,245,240,0.35)">
+              {order.userName}
             </Text>
-            <Text fontSize="sm" fontWeight="700" color="gray.800">
-              Total: ₹{(order.price * order.quantity).toFixed(2)}
+            <Text fontFamily="'Bebas Neue', sans-serif" fontSize="22px" color="#C9A84C" letterSpacing="0.04em" lineHeight="1">
+              ₹{(order.price * order.quantity).toFixed(0)}
             </Text>
-          </HStack>
+          </Flex>
         </Box>
-      </HStack>
-    </Box>
+      </Flex>
+    </div>
   );
 };
 
@@ -120,9 +99,8 @@ const MyOrders = () => {
         const userData = JSON.parse(localStorage.getItem("userData")) || {};
         const userID = userData._id || userData.id || "guest";
         const res = await axios.get(`${process.env.REACT_APP_BASEURL}/orders`);
-        const userOrders = res.data.filter(o => o.userID === userID);
-        setOrders(userOrders);
-      } catch (err) {
+        setOrders(res.data.filter((o) => o.userID === userID));
+      } catch {
         setError("Could not load orders. Please try again.");
       } finally {
         setLoading(false);
@@ -134,67 +112,59 @@ const MyOrders = () => {
   const totalSpent = orders.reduce((sum, o) => sum + o.price * o.quantity, 0);
 
   return (
-    <Box minH="100vh" bg="gray.50" py={10}>
-      <Container maxW="3xl">
-        <Box mb={8}>
-          <HStack spacing={3} mb={1}>
-            <Icon as={FiPackage} boxSize={6} color="teal.500" />
-            <Heading size="lg" color="gray.800" fontWeight="700">
-              My Orders
-            </Heading>
-          </HStack>
-          <Text color="gray.500" fontSize="sm">
-            Track all your ClearDekho purchases
+    <Box className="mo-page">
+      <style>{darkStyles}</style>
+
+      <Box maxW="900px" mx="auto" px={{ base: '6', md: '12' }} py={{ base: '10', md: '16' }}>
+        {/* Heading */}
+        <Box mb="10" borderBottom="1px solid rgba(255,255,255,0.07)" pb="8">
+          <Text fontFamily="'Bebas Neue', sans-serif" fontSize="clamp(40px,5vw,64px)" letterSpacing="0.02em" color="#f5f5f0" lineHeight="1" mb="2">
+            My Orders
+          </Text>
+          <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="rgba(245,245,240,0.35)" letterSpacing="0.15em" textTransform="uppercase">
+            Track all your Clear Vision purchases
           </Text>
         </Box>
 
+        {/* Stats */}
         {!loading && !error && orders.length > 0 && (
-          <SimpleGrid columns={2} spacing={4} mb={6}>
-            <Box bg="teal.50" borderRadius="xl" p={4} border="1px solid" borderColor="teal.100">
-              <Text fontSize="xs" color="teal.600" fontWeight="600" textTransform="uppercase" letterSpacing="wider">
-                Total Orders
-              </Text>
-              <Text fontSize="2xl" fontWeight="800" color="teal.700">{orders.length}</Text>
-            </Box>
-            <Box bg="purple.50" borderRadius="xl" p={4} border="1px solid" borderColor="purple.100">
-              <Text fontSize="xs" color="purple.600" fontWeight="600" textTransform="uppercase" letterSpacing="wider">
-                Total Spent
-              </Text>
-              <Text fontSize="2xl" fontWeight="800" color="purple.700">₹{totalSpent.toFixed(2)}</Text>
-            </Box>
+          <SimpleGrid columns={2} spacing="3" mb="10">
+            <div className="mo-stat">
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="rgba(245,245,240,0.35)" letterSpacing="0.25em" textTransform="uppercase" mb="2">Total Orders</Text>
+              <Text fontFamily="'Bebas Neue', sans-serif" fontSize="42px" color="#C9A84C" letterSpacing="0.04em" lineHeight="1">{orders.length}</Text>
+            </div>
+            <div className="mo-stat">
+              <Text fontFamily="'DM Sans', sans-serif" fontSize="10px" color="rgba(245,245,240,0.35)" letterSpacing="0.25em" textTransform="uppercase" mb="2">Total Spent</Text>
+              <Text fontFamily="'Bebas Neue', sans-serif" fontSize="42px" color="#C9A84C" letterSpacing="0.04em" lineHeight="1">₹{totalSpent.toFixed(0)}</Text>
+            </div>
           </SimpleGrid>
         )}
 
+        {/* States */}
         {loading ? (
-          <Center py={20}>
-            <VStack spacing={3}>
-              <Spinner size="xl" color="teal.500" thickness="3px" />
-              <Text color="gray.400">Loading your orders...</Text>
-            </VStack>
-          </Center>
+          <Flex py="24" justify="center" align="center" direction="column" gap="4">
+            <Spinner size="lg" color="#C9A84C" thickness="2px" />
+            <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="rgba(245,245,240,0.3)" letterSpacing="0.15em" textTransform="uppercase">Loading orders...</Text>
+          </Flex>
         ) : error ? (
-          <Center py={20}>
-            <VStack spacing={3}>
-              <Icon as={FiPackage} boxSize={10} color="red.300" />
-              <Text color="red.400" fontWeight="500">{error}</Text>
-            </VStack>
-          </Center>
+          <Flex py="24" justify="center" align="center" direction="column" gap="4">
+            <FiPackage size={40} color="rgba(245,245,240,0.15)" />
+            <Text fontFamily="'DM Sans', sans-serif" fontSize="13px" color="rgba(245,245,240,0.4)">{error}</Text>
+          </Flex>
         ) : orders.length === 0 ? (
-          <Center py={20}>
-            <VStack spacing={4}>
-              <Icon as={FiPackage} boxSize={14} color="gray.200" />
-              <Text color="gray.400" fontSize="lg" fontWeight="500">No orders yet</Text>
-              <Text color="gray.300" fontSize="sm">Your placed orders will appear here</Text>
-            </VStack>
-          </Center>
+          <Flex py="24" justify="center" align="center" direction="column" gap="4">
+            <FiPackage size={48} color="rgba(245,245,240,0.1)" />
+            <Text fontFamily="'Cormorant Garamond', serif" fontSize="2xl" color="rgba(245,245,240,0.25)" fontWeight="300">No orders yet</Text>
+            <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="rgba(245,245,240,0.2)">Your placed orders will appear here</Text>
+          </Flex>
         ) : (
-          <VStack spacing={4} align="stretch">
+          <VStack spacing="3" align="stretch">
             {orders.map((order, i) => (
               <OrderCard key={order._id || i} order={order} />
             ))}
           </VStack>
         )}
-      </Container>
+      </Box>
     </Box>
   );
 };
