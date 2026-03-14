@@ -676,7 +676,7 @@ const FreeEyeTestModal = ({ isOpen, onClose }) => (
         {[
           { title: 'Full Vision Checkup', desc: 'Comprehensive eye exam including near, far and colour vision assessment.' },
           { title: 'Prescription Update', desc: 'Walk out with your latest prescription — ready to order your new frames immediately.' },
-          { title: '1000+ Partner Stores', desc: 'Available at our partner opticians across India. No appointment needed at most locations.' },
+          { title: 'Partner Store Network', desc: 'Available at our partner opticians across India. No appointment needed at most locations.' },
           { title: 'Completely Free', desc: 'No hidden charges. The eye test is complimentary with any Clear Vision purchase.' },
         ].map((item, i) => (
           <div key={i} className="usp-step">
@@ -711,7 +711,7 @@ const USPStrip = () => {
     { icon: '◈', title: 'Premium Lenses',  desc: 'Anti-glare, UV protection & blue light blocking built-in on every lens.', onClick: lenses.onOpen },
     { icon: '⊙', title: 'Virtual Try-On',  desc: 'See how any frame looks on your face before buying.',                    onClick: tryon.onOpen },
     { icon: '◇', title: 'Home Trial',       desc: 'Order 5 frames. Try free at home. Keep only what you love.',            onClick: trial.onOpen },
-    { icon: '◉', title: 'Free Eye Test',    desc: 'Complimentary checkup at 1000+ partner stores across India.',           onClick: eyetest.onOpen },
+    { icon: '◉', title: 'Free Eye Test',    desc: 'Complimentary eye checkup at our partner stores across India.',          onClick: eyetest.onOpen },
   ];
 
   return (
