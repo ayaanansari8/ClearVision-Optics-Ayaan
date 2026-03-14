@@ -1,6 +1,6 @@
 # CLEAR VISION
 
-Clear Vision is a premium eyewear e-commerce platform offering eyeglasses, sunglasses, computer glasses, kids glasses, contact lenses and frames — all from a single store. Built with a bold dark theme, luxury UI, and a full admin dashboard.
+Clear Vision is a premium eyewear online store offering eyeglasses, sunglasses, computer glasses, kids glasses, contact lenses and frames — all from a single place. Built with a bold dark theme, luxury UI, and a full admin dashboard.
 
 ---
 
