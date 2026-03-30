@@ -8,7 +8,8 @@ const eyeglassesSchema=mongoose.Schema({
     shape:{type:String,required:true},
     image:{type:String,required:true},
     color:{type:String,required:true},
-    category:{type:String, default:"Eyeglasses"}
+    category:{type:String, default:"Eyeglasses"},
+    stock:{type:Number, default:0}
 },{
     versionKey:false
 });

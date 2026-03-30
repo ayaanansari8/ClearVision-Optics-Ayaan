@@ -130,17 +130,8 @@ const LoginPage = () => {
       >
         <ModalOverlay />
         <ModalContent rounded="3xl">
-          <ModalCloseButton
-            borderRadius={"50%"}
-            bg="white"
-            m={"10px 10px 0px 0px"}
-          />
+          <ModalCloseButton borderRadius={"50%"} bg="white" m={"10px 10px 0px 0px"} />
           <ModalBody p={"0px 0px"} borderRadius={"15px 15px 15px 15px"}>
-            <Image
-              src="https://static1.lenskart.com/media/desktop/img/DesignStudioIcons/DesktopLoginImage.svg"
-              alt="pic"
-              borderRadius={"10px 10px 0px 0px"}
-            />
             <Box m={"34px 45px 50px 45px"}>
               <Heading
                 fontFamily={"Times, serif"}
@@ -242,4 +233,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

@@ -44,19 +44,25 @@ const darkStyles = `
   .prod-grid-card:hover .prod-grid-cta { transform: translateY(0); }
 `;
 
-const EyeglassesList = () => {
+const EyeglassesList = ({ category }) => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("default");
 
   const products = useSelector((state) => state.productReducer?.products || []);
 
   const filtered = products
-    .filter((p) => (p.title || p.name || "").toLowerCase().includes(search.toLowerCase()))
+    .filter((p) => {
+      const matchesSearch = (p.title || p.name || "").toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = category ? p.category === category : true;
+      return matchesSearch && matchesCategory;
+    })
     .sort((a, b) => {
       if (sortBy === "price-asc") return (a.price || 0) - (b.price || 0);
       if (sortBy === "price-desc") return (b.price || 0) - (a.price || 0);
       return 0;
     });
+
+  const pageTitle = category || "All Eyewear";
 
   return (
     <Box className="el-page">
@@ -65,7 +71,7 @@ const EyeglassesList = () => {
       {/* Header */}
       <Box borderBottom="1px solid rgba(255,255,255,0.07)" py="12" px={{ base: "6", md: "12" }} maxW="1400px" mx="auto">
         <Text fontFamily="'Bebas Neue', sans-serif" fontSize="clamp(48px,6vw,80px)" letterSpacing="0.02em" color="#f5f5f0" lineHeight="1">
-          Eyeglasses
+          {pageTitle}
         </Text>
         <Text fontFamily="'DM Sans', sans-serif" fontSize="12px" color="rgba(245,245,240,0.4)" letterSpacing="0.15em" textTransform="uppercase" mt="2">
           {filtered.length} styles

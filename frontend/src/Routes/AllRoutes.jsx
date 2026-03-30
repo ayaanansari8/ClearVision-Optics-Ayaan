@@ -2,7 +2,6 @@ import EyeglassesList from '../Pages/EyeglassesList';
 import { Routes, Route } from 'react-router-dom';
 import AdminDashboard from '../Pages/AdminDashboard';
 import Home from '../Pages/Homepage/Home';
-import SinglePage from '../Components/Products/SingleCArd';
 import { Product } from '../Pages/Product';
 import AdminProducts from '../Pages/AdminProducts';
 import AdminProductEdit from '../Pages/AdminProductEdit';
@@ -24,7 +23,9 @@ const AllRoutes = () => {
             <Route path='/signup' element={<Signup />} />
             <Route path='/admindashboard' element={<AdminDashboard/>}/>
             <Route path="/eyeglasses/:id" element={<Product />} />
-            <Route path='/eyeglasses' element={<EyeglassesList />} />
+            <Route path='/eyeglasses' element={<EyeglassesList category="Eyeglasses" />} />
+            <Route path='/sunglasses' element={<EyeglassesList category="Sunglasses" />} />
+            <Route path='/contact-lenses' element={<EyeglassesList category="Contact Lenses" />} />
             <Route path='/adminproducts' element={<AdminProducts />} />
             <Route path="/allusers" element={<AllUsers/>}/>
             <Route path='/adminproducts/update/:id' element={<AdminProductEdit />} />

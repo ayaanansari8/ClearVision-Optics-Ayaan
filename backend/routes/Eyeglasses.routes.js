@@ -57,7 +57,7 @@ eyeglassRoutes.post('/add',async(req,res)=>{
 });
 
 // updating products for admin only
-eyeglassRoutes.patch('/updae/:id',async(req,res)=>{
+eyeglassRoutes.patch('/update/:id',async(req,res)=>{
     const {id}=req.params
     try {
         await EyeglassesModel.findByIdAndUpdate({_id:id},req.body)
